@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAWIT PSYCHO-MAP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/prop-types@15/prop-types.min.js"></script>
+<script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.js"></script>
+<script src="https://unpkg.com/@babel/standalone@7/babel.min.js"></script>
+<style>
+:root{
+  --bg:#F5F6F0;
+  --surface:#FFFFFF;
+  --ink:#1E2A20;
+  --ink-soft:#54604F;
+  --ink-muted:#8A8F80;
+  --palm:#2F5233;
+  --palm-light:#6B9071;
+  --palm-wash:#E7EEE3;
+  --clay:#9C6B3E;
+  --clay-wash:#F1E6D8;
+  --gold:#C99A3B;
+  --gold-wash:#F7EDD8;
+  --alert:#B0492F;
+  --alert-wash:#F5E2DC;
+  --rendah:#8FAE8B;
+  --sedang:#D9A441;
+  --tinggi:#C1543A;
+  --border:#DEDCCF;
+  --radius:8px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:'Inter',system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,.serif{font-family:'Source Serif 4',Georgia,serif;}
+button{font-family:inherit;}
+select,button{cursor:pointer;}
+::selection{background:var(--palm-wash);}
+.app{max-width:1180px;margin:0 auto;min-height:100vh;display:flex;}
+.sidebar{
+  display:none;
+  width:236px;flex-shrink:0;
+  border-right:1px solid var(--border);
+  padding:28px 16px;
+  position:sticky;top:0;height:100vh;overflow-y:auto;
+}
+.sidebar .brand{padding:0 10px 22px;}
+.sidebar .brand h1{font-size:19px;margin:0;font-weight:600;letter-spacing:0.2px;}
+.sidebar .brand p{font-size:12.5px;color:var(--ink-soft);margin:4px 0 0;line-height:1.4;}
+.navlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px;}
+.navitem{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 10px;border-radius:6px;
+  font-size:14px;color:var(--ink-soft);
+  border:none;background:none;text-align:left;width:100%;
+}
+.navitem:hover{background:var(--palm-wash);color:var(--ink);}
+.navitem.active{background:var(--palm);color:#fff;font-weight:500;}
+.navdot{width:6px;height:6px;border-radius:50%;background:currentColor;opacity:0.55;flex-shrink:0;}
+.main{flex:1;min-width:0;padding:20px 18px 96px;}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+.topbar h1{font-size:15px;font-weight:600;margin:0;color:var(--ink-soft);}
+.bottomnav{
+  position:fixed;bottom:0;left:0;right:0;
+  background:var(--surface);border-top:1px solid var(--border);
+  display:flex;justify-content:space-around;padding:6px 2px 8px;z-index:40;
+}
+.bottomnav button{
+  background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:3px;
+  font-size:10px;color:var(--ink-muted);padding:5px 4px;border-radius:6px;flex:1;
+}
+.bottomnav button.active{color:var(--palm);}
+.bnicon{width:19px;height:19px;border-radius:5px;border:1.6px solid currentColor;opacity:0.85;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 18px;}
+.section{margin-bottom:22px;}
+.section-head{margin-bottom:12px;}
+.section-head h2{font-size:18px;margin:0 0 6px;font-weight:600;}
+.section-head p{font-size:13.5px;color:var(--ink-soft);margin:0;line-height:1.6;max-width:62ch;}
+.grid{display:grid;gap:12px;}
+.grid-kpi{grid-template-columns:repeat(2,1fr);}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 15px;}
+.kpi .label{font-size:12px;color:var(--ink-soft);margin:0 0 6px;}
+.kpi .value{font-size:26px;font-weight:600;margin:0;font-family:'Source Serif 4',serif;}
+.kpi .sub{font-size:11.5px;color:var(--ink-muted);margin:4px 0 0;}
+.disclaimer{
+  background:var(--gold-wash);border:1px solid #E4CE9A;border-radius:var(--radius);
+  padding:12px 14px;font-size:12.5px;color:#6B4E17;line-height:1.55;margin-top:14px;
+  display:flex;gap:8px;
+}
+.disclaimer .mark{flex-shrink:0;font-weight:600;}
+.chip-row{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px;}
+.chip{
+  font-size:12px;padding:6px 11px;border-radius:99px;border:1px solid var(--border);
+  background:var(--surface);color:var(--ink-soft);
+}
+.chip.active{background:var(--ink);color:#fff;border-color:var(--ink);}
+.filterbar{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:16px;}
+.filterbar .fhead{display:flex;align-items:center;justify-content:space-between;cursor:pointer;}
+.filterbar .fhead span{font-size:13px;font-weight:500;}
+.filterbar .fhead .count{font-size:11px;background:var(--palm);color:#fff;border-radius:99px;padding:1px 7px;margin-left:6px;}
+.filtergrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:12px;}
+.filtergrid label{display:block;font-size:11.5px;color:var(--ink-soft);margin-bottom:4px;}
+.filtergrid select{width:100%;padding:7px 8px;border:1px solid var(--border);border-radius:6px;font-size:12.5px;background:#fff;color:var(--ink);}
+.legend{display:flex;gap:14px;align-items:center;font-size:12px;color:var(--ink-soft);flex-wrap:wrap;}
+.legend .sw{width:11px;height:11px;border-radius:3px;display:inline-block;margin-right:5px;vertical-align:-1.5px;}
+.explain{font-size:12.5px;color:var(--ink-soft);line-height:1.6;background:var(--palm-wash);border-radius:6px;padding:10px 12px;margin:12px 0 4px;}
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 14px 10px;margin-bottom:14px;}
+.chart-card h3{font-size:14px;margin:0 0 2px;font-weight:600;}
+.chart-card .cap{font-size:12px;color:var(--ink-soft);margin:0 0 10px;}
+.badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:99px;font-weight:500;}
+.badge.rendah{background:#EAF1E9;color:#4A6B47;}
+.badge.sedang{background:var(--gold-wash);color:#8A6820;}
+.badge.tinggi{background:var(--alert-wash);color:#8A3A26;}
+.hexmap{display:flex;flex-wrap:wrap;justify-content:center;gap:0;padding:6px 0 2px;}
+.regiondetail{margin-top:14px;border-top:1px solid var(--border);padding-top:14px;}
+.regiondetail .rd-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-top:10px;}
+.regiondetail .rd-item{background:var(--bg);border-radius:6px;padding:9px 10px;}
+.regiondetail .rd-item .l{font-size:11px;color:var(--ink-soft);}
+.regiondetail .rd-item .v{font-size:15px;font-weight:600;margin-top:2px;}
+.matrix2x2{display:grid;grid-template-columns:auto 1fr 1fr;grid-template-rows:auto 1fr 1fr;gap:6px;max-width:480px;margin:0 auto;}
+.matrix2x2 .axislabel{font-size:11.5px;color:var(--ink-soft);display:flex;align-items:center;justify-content:center;text-align:center;}
+.matrix2x2 .cell{border-radius:8px;padding:14px 10px;text-align:center;border:1px solid var(--border);}
+.matrix2x2 .cell .n{font-size:24px;font-weight:600;font-family:'Source Serif 4',serif;}
+.matrix2x2 .cell .pct{font-size:12px;color:var(--ink-soft);margin-top:1px;}
+.matrix2x2 .cell .lbl{font-size:11.5px;margin-top:6px;font-weight:500;}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--border);margin-bottom:16px;}
+.tabs button{background:none;border:none;padding:9px 14px;font-size:13px;color:var(--ink-soft);border-bottom:2px solid transparent;margin-bottom:-1px;}
+.tabs button.active{color:var(--palm);border-color:var(--palm);font-weight:500;}
+.privacy-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px;}
+.privacy-list li{font-size:13.5px;color:var(--ink-soft);line-height:1.6;padding-left:16px;position:relative;}
+.privacy-list li:before{content:'';position:absolute;left:0;top:8px;width:5px;height:5px;border-radius:50%;background:var(--palm);}
+.footer-note{font-size:11.5px;color:var(--ink-muted);text-align:center;margin-top:30px;padding-top:16px;border-top:1px solid var(--border);line-height:1.6;}
+.rd-empty{font-size:13px;color:var(--ink-muted);text-align:center;padding:22px 0;}
+@media(min-width:860px){
+  .sidebar{display:block;}
+  .bottomnav{display:none;}
+  .main{padding:32px 40px 40px;}
+  .grid-kpi{grid-template-columns:repeat(5,1fr);}
+  .filtergrid{grid-template-columns:repeat(3,1fr);}
+}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel" data-presets="react">
+const {useState,useMemo,useContext,createContext} = React;
+const RC = Recharts;
+
+/* ---------- seeded rng and data generation ---------- */
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+const rng = mulberry32(20260117);
+function ir(min,max){return Math.floor(rng()*(max-min+1))+min;}
+function fr(min,max){return rng()*(max-min)+min;}
+function pick(arr){return arr[Math.floor(rng()*arr.length)];}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+function irwinNoise(k=3,spread=0.6){let s=0;for(let i=0;i<k;i++)s+=rng();return (s/k-0.5)*2*spread;}
+
+const KECAMATAN = ["Birem Bayeun","Rantau Selamat","Ranto Peureulak","Banda Alam","Peureulak"];
+const PEKERJAAN = ["Pemanen","Pemeliharaan Kebun","Buruh Angkut","Buruh Harian Lepas"];
+
+function genData(n=124){
+  const rows=[];
+  for(let i=0;i<n;i++){
+    const kec = pick(KECAMATAN);
+    const gender = rng()<0.58?"Laki-laki":"Perempuan";
+    const usia = ir(20,58);
+    const masaKerja = ir(1,30);
+    const pekerjaan = pick(PEKERJAAN);
+    const rumahRusak = rng()<0.42?1:0;
+    const kebunRusak = rng()<0.5?1:0;
+    const kehilanganPendapatan = rng()<0.55?1:0;
+    const gangguanAkses = rng()<0.3?1:0;
+    const keterdampakanScore = rumahRusak+kebunRusak+kehilanganPendapatan+gangguanAkses;
+    let wfc = 2.15 + keterdampakanScore*0.18 + (gender==="Perempuan"?0.28:0) + irwinNoise(4,0.75);
+    wfc = clamp(wfc,1,5);
+    const genderSlope = gender==="Perempuan" ? 0.62 : 0.42;
+    let stres = 1.35 + genderSlope*wfc + keterdampakanScore*0.09 + irwinNoise(4,0.55);
+    stres = clamp(stres,1,5);
+    rows.push({id:"R"+String(i+1).padStart(3,"0"),kec,gender,usia,masaKerja,pekerjaan,
+      rumahRusak,kebunRusak,kehilanganPendapatan,gangguanAkses,keterdampakanScore,
+      wfc:+wfc.toFixed(2),stres:+stres.toFixed(2)});
+  }
+  return rows;
+}
+const DATA = genData(124);
+
+function catWFC(v){return v<2.34?"Rendah":v<3.67?"Sedang":"Tinggi";}
+function catStres(v){return v<2.34?"Rendah":v<3.67?"Sedang":"Tinggi";}
+function catDampak(s){return s<=1?"Rendah":s===2?"Sedang":"Tinggi";}
+DATA.forEach(d=>{d.catWfc=catWFC(d.wfc);d.catStres=catStres(d.stres);d.catDampak=catDampak(d.keterdampakanScore);});
+
+function mean(arr){return arr.length? arr.reduce((a,b)=>a+b,0)/arr.length : 0;}
+function pct(part,total){return total? Math.round(part/total*100) : 0;}
+function median(arr){const s=[...arr].sort((a,b)=>a-b);const m=Math.floor(s.length/2);return s.length%2? s[m] : (s[m-1]+s[m])/2;}
+function quartile(arr,q){const s=[...arr].sort((a,b)=>a-b);const pos=(s.length-1)*q;const b=Math.floor(pos);const r=pos-b;return s[b+1]!==undefined? s[b]+r*(s[b+1]-s[b]) : s[b];}
+function erf(x){const sign=x<0?-1:1;x=Math.abs(x);const a1=0.254829592,a2=-0.284496736,a3=1.421413741,a4=-1.453152027,a5=1.061405429,p=0.3275911;
+  const t=1/(1+p*x);const y=1-(((((a5*t+a4)*t)+a3)*t+a2)*t+a1)*t*Math.exp(-x*x);return sign*y;}
+function normalP(t){return 2*(1-0.5*(1+erf(Math.abs(t)/Math.SQRT2)));}
+function linreg(pts){
+  const n=pts.length; const mx=mean(pts.map(p=>p.x)); const my=mean(pts.map(p=>p.y));
+  let sxy=0,sxx=0,syy=0;
+  pts.forEach(p=>{sxy+=(p.x-mx)*(p.y-my);sxx+=(p.x-mx)*(p.x-mx);syy+=(p.y-my)*(p.y-my);});
+  const slope=sxy/sxx; const intercept=my-slope*mx;
+  const r2 = (sxy*sxy)/(sxx*syy);
+  const resid = pts.reduce((a,p)=>{const pred=intercept+slope*p.x;return a+(p.y-pred)**2;},0);
+  const se = Math.sqrt(resid/(n-2))/Math.sqrt(sxx);
+  const t = slope/se;
+  const p = normalP(t);
+  return {slope,intercept,r2,n,t,p,mx,my};
+}
+
+/* ---------- filter context ---------- */
+const FilterCtx = createContext(null);
+const emptyFilters = {gender:"Semua",kec:"Semua",pekerjaan:"Semua",dampak:"Semua",catWfc:"Semua",catStres:"Semua"};
+function applyFilters(data,f){
+  return data.filter(d=>
+    (f.gender==="Semua"||d.gender===f.gender) &&
+    (f.kec==="Semua"||d.kec===f.kec) &&
+    (f.pekerjaan==="Semua"||d.pekerjaan===f.pekerjaan) &&
+    (f.dampak==="Semua"||d.catDampak===f.dampak) &&
+    (f.catWfc==="Semua"||d.catWfc===f.catWfc) &&
+    (f.catStres==="Semua"||d.catStres===f.catStres)
+  );
+}
+function countActive(f){return Object.entries(f).filter(([k,v])=>v!=="Semua").length;}
+
+/* ---------- shared bits ---------- */
+const CAT_COLOR = {Rendah:"var(--rendah)",Sedang:"var(--sedang)",Tinggi:"var(--tinggi)"};
+function CatBadge({v}){return <span className={"badge "+v.toLowerCase()}>{v}</span>;}
+
+function Disclaimer({children}){
+  return <div className="disclaimer"><span className="mark">i</span><span>{children}</span></div>;
+}
+
+function KPI({label,value,sub}){
+  return <div className="kpi"><p className="label">{label}</p><p className="value">{value}</p>{sub && <p className="sub">{sub}</p>}</div>;
+}
+
+function SectionHead({title,desc}){
+  return <div className="section-head"><h2>{title}</h2>{desc && <p>{desc}</p>}</div>;
+}
+
+function GlobalFilterBar({fields}){
+  const {filters,setFilters} = useContext(FilterCtx);
+  const [open,setOpen] = useState(false);
+  const active = countActive(filters);
+  const opts = {
+    gender:["Semua","Laki-laki","Perempuan"],
+    kec:["Semua",...KECAMATAN],
+    pekerjaan:["Semua",...PEKERJAAN],
+    dampak:["Semua","Rendah","Sedang","Tinggi"],
+    catWfc:["Semua","Rendah","Sedang","Tinggi"],
+    catStres:["Semua","Rendah","Sedang","Tinggi"],
+  };
+  const labels = {gender:"Gender",kec:"Lokasi (kecamatan)",pekerjaan:"Kelompok pekerjaan",dampak:"Tingkat keterdampakan",catWfc:"Kategori WFC",catStres:"Kategori stres kerja"};
+  return (
+    <div className="filterbar">
+      <div className="fhead" onClick={()=>setOpen(!open)}>
+        <span>Filter data {active>0 && <span className="count">{active}</span>}</span>
+        <span style={{fontSize:12,color:"var(--ink-soft)"}}>{open?"Tutup":"Buka"}</span>
+      </div>
+      {open &&
+        <div className="filtergrid">
+          {fields.map(f=>
+            <div key={f}>
+              <label>{labels[f]}</label>
+              <select value={filters[f]} onChange={e=>setFilters({...filters,[f]:e.target.value})}>
+                {opts[f].map(o=><option key={o} value={o}>{o}</option>)}
+              </select>
+            </div>
+          )}
+        </div>
+      }
+    </div>
+  );
+}
+
+/* ---------- chart wrappers ---------- */
+function CategoryDistribution({data,field,title,cap}){
+  const rows=["Rendah","Sedang","Tinggi"].map(c=>({kat:c,jumlah:data.filter(d=>d[field]===c).length}));
+  return (
+    <div className="chart-card">
+      <h3>{title}</h3>
+      {cap && <p className="cap">{cap}</p>}
+      <RC.ResponsiveContainer width="100%" height={200}>
+        <RC.BarChart data={rows} margin={{top:4,right:8,left:-18,bottom:0}}>
+          <RC.CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#EAE8DC"/>
+          <RC.XAxis dataKey="kat" tick={{fontSize:12,fill:"#54604F"}} axisLine={{stroke:"#DEDCCF"}} tickLine={false}/>
+          <RC.YAxis tick={{fontSize:11,fill:"#8A8F80"}} axisLine={false} tickLine={false} allowDecimals={false}/>
+          <RC.Tooltip formatter={(v)=>[v+" responden","Jumlah"]} contentStyle={{fontSize:12,borderRadius:6}}/>
+          <RC.Bar dataKey="jumlah" radius={[4,4,0,0]}>
+            {rows.map((r,i)=><RC.Cell key={i} fill={CAT_COLOR[r.kat]}/>)}
+          </RC.Bar>
+        </RC.BarChart>
+      </RC.ResponsiveContainer>
+    </div>
+  );
+}
+
+function GenderComparisonBar({data,field,title,cap}){
+  const genders=["Laki-laki","Perempuan"];
+  const rows=genders.map(g=>({gender:g,rata2:+mean(data.filter(d=>d.gender===g).map(d=>d[field])).toFixed(2)}));
+  return (
+    <div className="chart-card">
+      <h3>{title}</h3>
+      {cap && <p className="cap">{cap}</p>}
+      <RC.ResponsiveContainer width="100%" height={190}>
+        <RC.BarChart data={rows} layout="vertical" margin={{top:4,right:20,left:8,bottom:0}}>
+          <RC.CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#EAE8DC"/>
+          <RC.XAxis type="number" domain={[0,5]} tick={{fontSize:11,fill:"#8A8F80"}} axisLine={{stroke:"#DEDCCF"}} tickLine={false}/>
+          <RC.YAxis type="category" dataKey="gender" tick={{fontSize:12,fill:"#54604F"}} axisLine={false} tickLine={false} width={78}/>
+          <RC.Tooltip formatter={(v)=>[v,"Rata-rata skor"]} contentStyle={{fontSize:12,borderRadius:6}}/>
+          <RC.Bar dataKey="rata2" radius={[0,4,4,0]}>
+            <RC.Cell fill="var(--palm)"/><RC.Cell fill="var(--clay)"/>
+          </RC.Bar>
+        </RC.BarChart>
+      </RC.ResponsiveContainer>
+    </div>
+  );
+}
+
+function DampakComparisonBar({data,field,title}){
+  const cats=["Rendah","Sedang","Tinggi"];
+  const rows=cats.map(c=>({kat:c,rata2:+mean(data.filter(d=>d.catDampak===c).map(d=>d[field])).toFixed(2)}));
+  return (
+    <div className="chart-card">
+      <h3>{title}</h3>
+      <p className="cap">Rata-rata skor menurut tingkat keterdampakan bencana</p>
+      <RC.ResponsiveContainer width="100%" height={190}>
+        <RC.BarChart data={rows} margin={{top:4,right:8,left:-18,bottom:0}}>
+          <RC.CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#EAE8DC"/>
+          <RC.XAxis dataKey="kat" tick={{fontSize:12,fill:"#54604F"}} axisLine={{stroke:"#DEDCCF"}} tickLine={false}/>
+          <RC.YAxis domain={[0,5]} tick={{fontSize:11,fill:"#8A8F80"}} axisLine={false} tickLine={false}/>
+          <RC.Tooltip formatter={(v)=>[v,"Rata-rata skor"]} contentStyle={{fontSize:12,borderRadius:6}}/>
+          <RC.Bar dataKey="rata2" radius={[4,4,0,0]}>
+            {rows.map((r,i)=><RC.Cell key={i} fill={CAT_COLOR[r.kat]}/>)}
+          </RC.Bar>
+        </RC.BarChart>
+      </RC.ResponsiveContainer>
+    </div>
+  );
+}
+
+function BoxPlotMini({data,field,title}){
+  const genders=["Laki-laki","Perempuan"];
+  const stats=genders.map(g=>{
+    const vals=data.filter(d=>d.gender===g).map(d=>d[field]);
+    if(!vals.length) return {g,min:0,q1:0,med:0,q3:0,max:0};
+    return {g,min:Math.min(...vals),q1:quartile(vals,0.25),med:median(vals),q3:quartile(vals,0.75),max:Math.max(...vals)};
+  });
+  const scaleX = v => 30 + (v-1)/4*260;
+  return (
+    <div className="chart-card">
+      <h3>{title}</h3>
+      <p className="cap">Sebaran skor per gender (garis: rentang min-maks, kotak: kuartil, titik: median)</p>
+      <svg viewBox="0 0 340 100" width="100%" height="110">
+        {stats.map((s,i)=>{
+          const y=28+i*38;
+          return (
+            <g key={s.g}>
+              <line x1={scaleX(s.min)} x2={scaleX(s.max)} y1={y} y2={y} stroke="#B4B2A9" strokeWidth="1.4"/>
+              <rect x={scaleX(s.q1)} y={y-8} width={Math.max(2,scaleX(s.q3)-scaleX(s.q1))} height="16" rx="3"
+                fill={i===0?"var(--palm-light)":"var(--clay)"} opacity="0.35"/>
+              <circle cx={scaleX(s.med)} cy={y} r="4" fill={i===0?"var(--palm)":"var(--clay)"}/>
+              <text x="4" y={y+4} fontSize="11" fill="#54604F">{s.g==="Laki-laki"?"L":"P"}</text>
+            </g>
+          );
+        })}
+        <text x="30" y="98" fontSize="10" fill="#8A8F80">1</text>
+        <text x="290" y="98" fontSize="10" fill="#8A8F80">5</text>
+      </svg>
+    </div>
+  );
+}
+
+function ScatterWfcStres({data,showRegression=true}){
+  const L = data.filter(d=>d.gender==="Laki-laki");
+  const P = data.filter(d=>d.gender==="Perempuan");
+  const regL = L.length>2 ? linreg(L.map(d=>({x:d.wfc,y:d.stres}))) : null;
+  const regP = P.length>2 ? linreg(P.map(d=>({x:d.wfc,y:d.stres}))) : null;
+  const lineL = regL ? [{wfc:1,y:regL.intercept+regL.slope*1},{wfc:5,y:regL.intercept+regL.slope*5}] : [];
+  const lineP = regP ? [{wfc:1,y:regP.intercept+regP.slope*1},{wfc:5,y:regP.intercept+regP.slope*5}] : [];
+  return (
+    <div className="chart-card">
+      <h3>WFC dan stres kerja, menurut gender</h3>
+      <p className="cap">Setiap titik adalah satu responden. Garis menunjukkan pola umum tiap kelompok gender.</p>
+      <RC.ResponsiveContainer width="100%" height={280}>
+        <RC.ComposedChart margin={{top:8,right:16,left:-12,bottom:6}}>
+          <RC.CartesianGrid strokeDasharray="3 3" stroke="#EAE8DC"/>
+          <RC.XAxis type="number" dataKey="wfc" name="WFC" domain={[1,5]} tick={{fontSize:11,fill:"#8A8F80"}} axisLine={{stroke:"#DEDCCF"}} tickLine={false} label={{value:"Work-Family Conflict",position:"insideBottom",dy:14,fontSize:11,fill:"#54604F"}}/>
+          <RC.YAxis type="number" dataKey="stres" name="Stres" domain={[1,5]} tick={{fontSize:11,fill:"#8A8F80"}} axisLine={false} tickLine={false} label={{value:"Stres kerja",angle:-90,position:"insideLeft",fontSize:11,fill:"#54604F"}}/>
+          <RC.Tooltip cursor={{strokeDasharray:"3 3"}} contentStyle={{fontSize:12,borderRadius:6}}/>
+          <RC.Scatter name="Laki-laki" data={L} fill="var(--palm)" opacity={0.75} shape="circle"/>
+          <RC.Scatter name="Perempuan" data={P} fill="var(--clay)" opacity={0.75} shape="triangle"/>
+          {showRegression && regL && <RC.Line data={lineL} dataKey="y" xAxisId={0} type="linear" dot={false} stroke="var(--palm)" strokeWidth={2}/>}
+          {showRegression && regP && <RC.Line data={lineP} dataKey="y" xAxisId={0} type="linear" dot={false} stroke="var(--clay)" strokeWidth={2}/>}
+          <RC.Legend wrapperStyle={{fontSize:12}}/>
+        </RC.ComposedChart>
+      </RC.ResponsiveContainer>
+    </div>
+  );
+}
+
+/* ---------- hex region map ---------- */
+const HEX_LAYOUT = [
+  {kec:"Birem Bayeun",cx:170,cy:70},
+  {kec:"Rantau Selamat",cx:280,cy:70},
+  {kec:"Ranto Peureulak",cx:225,cy:158},
+  {kec:"Banda Alam",cx:335,cy:158},
+  {kec:"Peureulak",cx:280,cy:246},
+];
+function hexPoints(cx,cy,r){
+  let pts=[];
+  for(let i=0;i<6;i++){
+    const a = Math.PI/180*(60*i-30);
+    pts.push([cx+r*Math.cos(a),cy+r*Math.sin(a)].join(","));
+  }
+  return pts.join(" ");
+}
+function colorForValue(v,max){
+  const t = clamp(v/max,0,1);
+  if(t<0.34) return "var(--rendah)";
+  if(t<0.67) return "var(--sedang)";
+  return "var(--tinggi)";
+}
+function RegionMap({data,layer,onSelect,selected}){
+  const perKec = KECAMATAN.map(k=>{
+    const rows = data.filter(d=>d.kec===k);
+    return {kec:k, n:rows.length,
+      wfc:+mean(rows.map(d=>d.wfc)).toFixed(2),
+      stres:+mean(rows.map(d=>d.stres)).toFixed(2),
+      dampak:+mean(rows.map(d=>d.keterdampakanScore)).toFixed(2)};
+  });
+  const valueMap = {WFC:"wfc",Stres:"stres",Keterdampakan:"dampak"};
+  const maxVal = {WFC:5,Stres:5,Keterdampakan:4};
+  const field = valueMap[layer];
+  return (
+    <svg viewBox="0 0 420 320" width="100%" style={{maxWidth:420,display:"block",margin:"0 auto"}} role="img" aria-label="Peta skematik lima kecamatan">
+      {HEX_LAYOUT.map(h=>{
+        const rec = perKec.find(p=>p.kec===h.kec);
+        const val = rec ? rec[field] : 0;
+        const fill = rec && rec.n>0 ? colorForValue(val,maxVal[layer]) : "#EDECE3";
+        const isSel = selected===h.kec;
+        return (
+          <g key={h.kec} onClick={()=>onSelect(h.kec)} style={{cursor:"pointer"}}>
+            <polygon points={hexPoints(h.cx,h.cy,52)} fill={fill} stroke={isSel?"var(--ink)":"#fff"} strokeWidth={isSel?2.5:2} opacity={0.92}/>
+            <text x={h.cx} y={h.cy-2} textAnchor="middle" fontSize="11" fontWeight="600" fill="#2C2C2A">{h.kec.split(" ")[0]}</text>
+            <text x={h.cx} y={h.cy+13} textAnchor="middle" fontSize="10" fill="#2C2C2A" opacity="0.75">{h.kec.split(" ").slice(1).join(" ")}</text>
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
+/* ---------- priority matrix ---------- */
+function PriorityMatrix({data}){
+  const wfcMed = median(data.map(d=>d.wfc));
+  const stresMed = median(data.map(d=>d.stres));
+  const total = data.length || 1;
+  const quad = {
+    A: data.filter(d=>d.wfc<wfcMed && d.stres<stresMed),
+    B: data.filter(d=>d.wfc<wfcMed && d.stres>=stresMed),
+    C: data.filter(d=>d.wfc>=wfcMed && d.stres<stresMed),
+    D: data.filter(d=>d.wfc>=wfcMed && d.stres>=stresMed),
+  };
+  const cellStyle = (key)=>{
+    const bg = key==="D" ? "var(--alert-wash)" : key==="A" ? "var(--palm-wash)" : "var(--gold-wash)";
+    return {background:bg};
+  };
+  const labelFor = {A:"Relatif adaptif",B:"Perhatian pada stres",C:"Perlu pemantauan",D:"Prioritas perhatian psikososial"};
+  return (
+    <div>
+      <div className="matrix2x2">
+        <div></div>
+        <div className="axislabel">Stres rendah</div>
+        <div className="axislabel">Stres tinggi</div>
+        <div className="axislabel" style={{writingMode:"vertical-rl",transform:"rotate(180deg)"}}>WFC rendah</div>
+        <div className="cell" style={cellStyle("A")}><div className="n">{quad.A.length}</div><div className="pct">{pct(quad.A.length,total)}% responden</div><div className="lbl">{labelFor.A}</div></div>
+        <div className="cell" style={cellStyle("B")}><div className="n">{quad.B.length}</div><div className="pct">{pct(quad.B.length,total)}% responden</div><div className="lbl">{labelFor.B}</div></div>
+        <div className="axislabel" style={{writingMode:"vertical-rl",transform:"rotate(180deg)"}}>WFC tinggi</div>
+        <div className="cell" style={cellStyle("C")}><div className="n">{quad.C.length}</div><div className="pct">{pct(quad.C.length,total)}% responden</div><div className="lbl">{labelFor.C}</div></div>
+        <div className="cell" style={cellStyle("D")}><div className="n">{quad.D.length}</div><div className="pct">{pct(quad.D.length,total)}% responden</div><div className="lbl">{labelFor.D}</div></div>
+      </div>
+      <Disclaimer>Kategori ini adalah hasil pemetaan penelitian berdasarkan pembagian median skor sampel, bukan diagnosis atau penilaian klinis individual.</Disclaimer>
+    </div>
+  );
+}
+
+/* ---------- pages ---------- */
+function Beranda({data}){
+  const total = data.length;
+  const wfcTinggi = pct(data.filter(d=>d.catWfc==="Tinggi").length,total);
+  const stresTinggi = pct(data.filter(d=>d.catStres==="Tinggi").length,total);
+  const dampakTinggi = pct(data.filter(d=>d.catDampak==="Tinggi").length,total);
+  return (
+    <div>
+      <div className="section">
+        <p style={{fontSize:12,color:"var(--palm)",fontWeight:500,margin:"0 0 6px",textTransform:"none"}}>Pemetaan kondisi psikososial buruh sawit pascabencana</p>
+        <h2 style={{fontSize:24,margin:"0 0 10px",lineHeight:1.3}}>Bagaimana kondisi psikososial pekerja sawit setelah bencana?</h2>
+        <p style={{fontSize:13.5,color:"var(--ink-soft)",lineHeight:1.65,maxWidth:"58ch",margin:0}}>
+          Platform ini menampilkan pemetaan work-family conflict dan stres kerja pada buruh tani sawit di Langsa dan Aceh Timur, pascabencana hidrometeorologi November 2025, dengan gender sebagai pembeda pola.
+        </p>
+        <Disclaimer>Informasi ini merupakan hasil pemetaan penelitian dan bukan diagnosis psikologis individual.</Disclaimer>
+      </div>
+      <div className="section">
+        <div className="grid grid-kpi">
+          <KPI label="Jumlah responden" value={total} sub="Data uji coba (dummy)"/>
+          <KPI label="Wilayah penelitian" value="5 kecamatan" sub="Langsa dan Aceh Timur"/>
+          <KPI label="WFC kategori tinggi" value={wfcTinggi+"%"} sub="Dari seluruh responden"/>
+          <KPI label="Stres kerja tinggi" value={stresTinggi+"%"} sub="Dari seluruh responden"/>
+          <KPI label="Keterdampakan tinggi" value={dampakTinggi+"%"} sub="Dari seluruh responden"/>
+        </div>
+      </div>
+      <div className="section">
+        <SectionHead title="Menjelajahi platform" desc="Gunakan menu untuk melihat setiap bagian pemetaan."/>
+        <ul className="privacy-list">
+          <li>Pemetaan menampilkan kondisi tiap kecamatan pada peta skematik yang bisa diklik.</li>
+          <li>Halaman WFC dan Stres Kerja menampilkan distribusi dan perbandingan kelompok.</li>
+          <li>Halaman Gender menampilkan perbedaan pola antara laki-laki dan perempuan.</li>
+          <li>Halaman Kelompok Prioritas menandai kelompok yang memerlukan perhatian lebih.</li>
+        </ul>
+      </div>
+    </div>
+  );
+}
+
+function Pemetaan({data}){
+  const {filters} = useContext(FilterCtx);
+  const filtered = applyFilters(data,filters);
+  const [layer,setLayer]=useState("WFC");
+  const [selected,setSelected]=useState(null);
+  const layers=["WFC","Stres","Keterdampakan"];
+  const detail = selected ? filtered.filter(d=>d.kec===selected) : [];
+  return (
+    <div>
+      <SectionHead title="Pemetaan wilayah" desc="Peta skematik ini menampilkan kondisi agregat tiap kecamatan. Tidak ada identitas atau lokasi individu yang ditampilkan."/>
+      <GlobalFilterBar fields={["gender","pekerjaan","dampak"]}/>
+      <div className="chip-row">
+        {layers.map(l=><button key={l} className={"chip"+(layer===l?" active":"")} onClick={()=>setLayer(l)}>{l}</button>)}
+      </div>
+      <div className="chart-card">
+        <RegionMap data={filtered} layer={layer} onSelect={setSelected} selected={selected}/>
+        <div style={{textAlign:"center",marginTop:10}}>
+          <div className="legend" style={{justifyContent:"center"}}>
+            <span><span className="sw" style={{background:"var(--rendah)"}}></span>Rendah</span>
+            <span><span className="sw" style={{background:"var(--sedang)"}}></span>Sedang</span>
+            <span><span className="sw" style={{background:"var(--tinggi)"}}></span>Tinggi</span>
+          </div>
+          <p className="cap" style={{marginTop:8}}>Peta ubin skematik, bukan peta geografis presisi. Klik salah satu wilayah untuk melihat detail.</p>
+        </div>
+        <div className="regiondetail">
+          {selected ?
+            <div>
+              <h3 style={{margin:0,fontSize:15}}>{selected}</h3>
+              <div className="rd-grid">
+                <div className="rd-item"><div className="l">Jumlah responden</div><div className="v">{detail.length}</div></div>
+                <div className="rd-item"><div className="l">Distribusi gender</div><div className="v" style={{fontSize:13}}>{detail.filter(d=>d.gender==="Laki-laki").length} L, {detail.filter(d=>d.gender==="Perempuan").length} P</div></div>
+                <div className="rd-item"><div className="l">Rata-rata WFC</div><div className="v">{mean(detail.map(d=>d.wfc)).toFixed(2)}</div></div>
+                <div className="rd-item"><div className="l">Rata-rata stres kerja</div><div className="v">{mean(detail.map(d=>d.stres)).toFixed(2)}</div></div>
+                <div className="rd-item"><div className="l">Proporsi WFC tinggi</div><div className="v">{pct(detail.filter(d=>d.catWfc==="Tinggi").length,detail.length)}%</div></div>
+                <div className="rd-item"><div className="l">Proporsi stres tinggi</div><div className="v">{pct(detail.filter(d=>d.catStres==="Tinggi").length,detail.length)}%</div></div>
+              </div>
+            </div>
+            : <p className="rd-empty">Pilih salah satu wilayah pada peta untuk melihat detail.</p>
+          }
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function WFCPage({data}){
+  const {filters} = useContext(FilterCtx);
+  const filtered = applyFilters(data,filters);
+  return (
+    <div>
+      <SectionHead title="Work-Family Conflict (WFC)"/>
+      <div className="explain">WFC menggambarkan sejauh mana tuntutan pekerjaan dan keluarga saling mengganggu.</div>
+      <GlobalFilterBar fields={["gender","kec","pekerjaan","dampak"]}/>
+      <div className="grid grid-kpi" style={{marginBottom:14}}>
+        <KPI label="Rata-rata skor WFC" value={mean(filtered.map(d=>d.wfc)).toFixed(2)} sub="Skala 1 sampai 5"/>
+        <KPI label="Kategori tinggi" value={pct(filtered.filter(d=>d.catWfc==="Tinggi").length,filtered.length)+"%"} sub="Dari data terfilter"/>
+      </div>
+      <CategoryDistribution data={filtered} field="catWfc" title="Distribusi kategori WFC" cap="Jumlah responden pada tiap kategori"/>
+      <GenderComparisonBar data={filtered} field="wfc" title="Rata-rata WFC menurut gender"/>
+      <DampakComparisonBar data={filtered} field="wfc" title="Rata-rata WFC menurut keterdampakan bencana"/>
+    </div>
+  );
+}
+
+function StresPage({data}){
+  const {filters} = useContext(FilterCtx);
+  const filtered = applyFilters(data,filters);
+  return (
+    <div>
+      <SectionHead title="Stres kerja"/>
+      <div className="explain">Angka pada halaman ini menunjukkan tingkat stres kerja dalam sampel penelitian, bukan diagnosis kesehatan mental.</div>
+      <GlobalFilterBar fields={["gender","kec","pekerjaan","dampak"]}/>
+      <div className="grid grid-kpi" style={{marginBottom:14}}>
+        <KPI label="Rata-rata skor stres" value={mean(filtered.map(d=>d.stres)).toFixed(2)} sub="Skala 1 sampai 5"/>
+        <KPI label="Kategori tinggi" value={pct(filtered.filter(d=>d.catStres==="Tinggi").length,filtered.length)+"%"} sub="Dari data terfilter"/>
+      </div>
+      <CategoryDistribution data={filtered} field="catStres" title="Distribusi kategori stres kerja" cap="Jumlah responden pada tiap kategori"/>
+      <GenderComparisonBar data={filtered} field="stres" title="Rata-rata stres kerja menurut gender"/>
+      <DampakComparisonBar data={filtered} field="stres" title="Rata-rata stres kerja menurut keterdampakan bencana"/>
+    </div>
+  );
+}
+
+function GenderPage({data}){
+  const {filters} = useContext(FilterCtx);
+  const filtered = applyFilters(data,filters);
+  return (
+    <div>
+      <SectionHead title="Gender" desc="Perbandingan pola WFC dan stres kerja antara laki-laki dan perempuan."/>
+      <GlobalFilterBar fields={["kec","pekerjaan","dampak"]}/>
+      <GenderComparisonBar data={filtered} field="wfc" title="Rata-rata WFC, laki-laki vs perempuan"/>
+      <GenderComparisonBar data={filtered} field="stres" title="Rata-rata stres kerja, laki-laki vs perempuan"/>
+      <BoxPlotMini data={filtered} field="wfc" title="Sebaran skor WFC menurut gender"/>
+      <ScatterWfcStres data={filtered}/>
+      <div className="explain">Analisis moderasi digunakan untuk melihat apakah kekuatan hubungan antara WFC dan stres kerja berbeda berdasarkan gender. Kemiringan garis yang berbeda antar kelompok menunjukkan pola tersebut, namun perbedaan ini bukan pernyataan sebab akibat.</div>
+    </div>
+  );
+}
+
+function HubunganPage({data}){
+  const {filters} = useContext(FilterCtx);
+  const filtered = applyFilters(data,filters);
+  const [showDetail,setShowDetail]=useState(false);
+  const reg = filtered.length>2 ? linreg(filtered.map(d=>({x:d.wfc,y:d.stres}))) : null;
+  return (
+    <div>
+      <SectionHead title="Hubungan WFC dan stres kerja"/>
+      <GlobalFilterBar fields={["gender","kec","pekerjaan","dampak"]}/>
+      <ScatterWfcStres data={filtered} showRegression={true}/>
+      <div className="chart-card">
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <h3 style={{margin:0}}>Detail analisis</h3>
+          <button className="chip" style={{padding:"5px 10px"}} onClick={()=>setShowDetail(!showDetail)}>{showDetail?"Sembunyikan":"Tampilkan"}</button>
+        </div>
+        {showDetail && reg &&
+          <div className="regiondetail" style={{borderTop:"none",paddingTop:8}}>
+            <div className="rd-grid">
+              <div className="rd-item"><div className="l">Koefisien (kemiringan)</div><div className="v">{reg.slope.toFixed(3)}</div></div>
+              <div className="rd-item"><div className="l">p-value</div><div className="v">{reg.p<0.001?"< 0.001":reg.p.toFixed(3)}</div></div>
+              <div className="rd-item"><div className="l">R kuadrat</div><div className="v">{reg.r2.toFixed(3)}</div></div>
+              <div className="rd-item"><div className="l">Jumlah data (n)</div><div className="v">{reg.n}</div></div>
+            </div>
+            <p className="cap" style={{marginTop:10}}>Dihitung dari data terfilter saat ini menggunakan regresi linear sederhana. Nilai bersifat deskriptif untuk keperluan prototipe, bukan hasil uji Hayes PROCESS final.</p>
+          </div>
+        }
+      </div>
+    </div>
+  );
+}
+
+function KeterdampakanPage({data}){
+  const {filters} = useContext(FilterCtx);
+  const filtered = applyFilters(data,filters);
+  const total = filtered.length || 1;
+  const comps = [
+    {key:"rumahRusak",label:"Kerusakan rumah"},
+    {key:"kebunRusak",label:"Kerusakan kebun"},
+    {key:"kehilanganPendapatan",label:"Kehilangan pendapatan"},
+    {key:"gangguanAkses",label:"Gangguan akses"},
+  ];
+  const rows = comps.map(c=>({label:c.label,persen:pct(filtered.filter(d=>d[c.key]===1).length,total)}));
+  return (
+    <div>
+      <SectionHead title="Profil keterdampakan bencana" desc="Menampilkan komponen keterdampakan bencana hidrometeorologi, sebagai checklist objektif, bukan profil trauma klinis."/>
+      <GlobalFilterBar fields={["gender","kec","pekerjaan"]}/>
+      <div className="chart-card">
+        <h3>Komponen keterdampakan</h3>
+        <p className="cap">Persentase responden yang mengalami tiap jenis dampak</p>
+        <RC.ResponsiveContainer width="100%" height={220}>
+          <RC.BarChart data={rows} layout="vertical" margin={{top:4,right:24,left:0,bottom:0}}>
+            <RC.CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#EAE8DC"/>
+            <RC.XAxis type="number" domain={[0,100]} tick={{fontSize:11,fill:"#8A8F80"}} axisLine={{stroke:"#DEDCCF"}} tickLine={false} unit="%"/>
+            <RC.YAxis type="category" dataKey="label" tick={{fontSize:11.5,fill:"#54604F"}} axisLine={false} tickLine={false} width={140}/>
+            <RC.Tooltip formatter={(v)=>[v+"%","Responden terdampak"]} contentStyle={{fontSize:12,borderRadius:6}}/>
+            <RC.Bar dataKey="persen" radius={[0,4,4,0]} fill="var(--clay)"/>
+          </RC.BarChart>
+        </RC.ResponsiveContainer>
+      </div>
+      <CategoryDistribution data={filtered} field="catDampak" title="Distribusi tingkat keterdampakan" cap="Jumlah responden pada tiap kategori"/>
+    </div>
+  );
+}
+
+function PrioritasPage({data}){
+  const {filters} = useContext(FilterCtx);
+  const filtered = applyFilters(data,filters);
+  return (
+    <div>
+      <SectionHead title="Kelompok prioritas" desc="Kelompok dengan WFC tinggi dan stres kerja tinggi secara bersamaan memerlukan perhatian psikososial lebih lanjut."/>
+      <GlobalFilterBar fields={["gender","kec","pekerjaan"]}/>
+      <div className="chart-card">
+        <PriorityMatrix data={filtered}/>
+      </div>
+    </div>
+  );
+}
+
+function TentangPage(){
+  const [tab,setTab]=useState("penelitian");
+  return (
+    <div>
+      <SectionHead title="Tentang dan privasi"/>
+      <div className="tabs">
+        <button className={tab==="penelitian"?"active":""} onClick={()=>setTab("penelitian")}>Tentang penelitian</button>
+        <button className={tab==="privasi"?"active":""} onClick={()=>setTab("privasi")}>Privasi dan etika data</button>
+      </div>
+      {tab==="penelitian" &&
+        <div className="card">
+          <h3 style={{marginTop:0}}>Gender sebagai Moderator Work-Family Conflict dan Stres Kerja Buruh Tani Sawit Pascabencana Aceh Timur</h3>
+          <div className="regiondetail" style={{borderTop:"none",paddingTop:6}}>
+            <div className="rd-grid">
+              <div className="rd-item"><div className="l">Tujuan</div><div className="v" style={{fontSize:13,fontWeight:400}}>Menguji pengaruh WFC terhadap stres kerja dan peran moderasi gender pada buruh tani sawit pascabencana</div></div>
+              <div className="rd-item"><div className="l">Metode</div><div className="v" style={{fontSize:13,fontWeight:400}}>Kuantitatif korelasional dengan uji moderasi, Hayes PROCESS Model 1</div></div>
+              <div className="rd-item"><div className="l">Variabel</div><div className="v" style={{fontSize:13,fontWeight:400}}>WFC (X), Stres Kerja (Y), Gender (moderator), Keterdampakan bencana (kovariat)</div></div>
+              <div className="rd-item"><div className="l">Populasi</div><div className="v" style={{fontSize:13,fontWeight:400}}>Buruh tani sawit di Langsa dan Aceh Timur yang terdampak bencana November 2025</div></div>
+            </div>
+          </div>
+          <Disclaimer>Rancangan ini adalah rancangan riset untuk didiskusikan dengan tim dan dosen pembimbing, bukan hasil final.</Disclaimer>
+          <p style={{fontSize:12,color:"var(--ink-muted)",marginTop:16}}>Kontak tim peneliti: [CATATAN UNTUK PENULIS, DATA DIPERLUKAN]</p>
+        </div>
+      }
+      {tab==="privasi" &&
+        <div className="card">
+          <h3 style={{marginTop:0}}>Privasi dan etika data</h3>
+          <ul className="privacy-list">
+            <li>Data yang ditampilkan digunakan semata-mata untuk keperluan penelitian.</li>
+            <li>Identitas responden tidak ditampilkan pada platform ini dalam bentuk apa pun.</li>
+            <li>Lokasi ditampilkan secara agregat pada tingkat kecamatan, bukan alamat atau koordinat individu.</li>
+            <li>Data psikologis individual tidak dipublikasikan kepada pihak mana pun.</li>
+            <li>Platform ini bukan alat diagnosis dan tidak menggantikan penilaian oleh tenaga profesional.</li>
+          </ul>
+        </div>
+      }
+    </div>
+  );
+}
+
+/* ---------- app shell ---------- */
+const NAV = [
+  {id:"beranda",label:"Beranda"},
+  {id:"peta",label:"Pemetaan"},
+  {id:"wfc",label:"WFC"},
+  {id:"stres",label:"Stres Kerja"},
+  {id:"gender",label:"Gender"},
+  {id:"dampak",label:"Keterdampakan Bencana"},
+  {id:"prioritas",label:"Kelompok Prioritas"},
+  {id:"tentang",label:"Tentang Penelitian"},
+];
+const MOBILE_NAV = ["beranda","peta","wfc","gender","prioritas"];
+const MOBILE_LABEL = {beranda:"Beranda",peta:"Peta",wfc:"WFC",gender:"Gender",prioritas:"Prioritas"};
+const PAGE_TITLE = Object.fromEntries(NAV.map(n=>[n.id,n.label]));
+
+function App(){
+  const [page,setPage]=useState("beranda");
+  const [filters,setFilters]=useState({...emptyFilters});
+  const pageMap = {
+    beranda:<Beranda data={DATA}/>,
+    peta:<Pemetaan data={DATA}/>,
+    wfc:<WFCPage data={DATA}/>,
+    stres:<StresPage data={DATA}/>,
+    gender:<GenderPage data={DATA}/>,
+    hubungan:<HubunganPage data={DATA}/>,
+    dampak:<KeterdampakanPage data={DATA}/>,
+    prioritas:<PrioritasPage data={DATA}/>,
+    tentang:<TentangPage/>,
+  };
+  return (
+    <FilterCtx.Provider value={{filters,setFilters}}>
+      <div className="app">
+        <aside className="sidebar">
+          <div className="brand">
+            <h1>SAWIT PSYCHO-MAP</h1>
+            <p>Pemetaan kondisi psikososial buruh sawit pascabencana</p>
+          </div>
+          <ul className="navlist">
+            {NAV.map(n=>
+              <li key={n.id}>
+                <button className={"navitem"+(page===n.id?" active":"")} onClick={()=>setPage(n.id)}>
+                  <span className="navdot"></span>{n.label}
+                </button>
+              </li>
+            )}
+            <li>
+              <button className={"navitem"+(page==="hubungan"?" active":"")} onClick={()=>setPage("hubungan")}>
+                <span className="navdot"></span>Hubungan WFC-Stres
+              </button>
+            </li>
+          </ul>
+        </aside>
+        <main className="main">
+          <div className="topbar">
+            <h1>{page==="hubungan"?"Hubungan WFC-Stres":PAGE_TITLE[page]}</h1>
+          </div>
+          {pageMap[page]}
+          <div className="footer-note">
+            Prototipe riset psikologi terapan &middot; Data yang ditampilkan adalah data uji coba, bukan data lapangan sesungguhnya
+          </div>
+        </main>
+        <nav className="bottomnav">
+          {MOBILE_NAV.map(id=>
+            <button key={id} className={page===id?"active":""} onClick={()=>setPage(id)}>
+              <span className="bnicon"></span>{MOBILE_LABEL[id]}
+            </button>
+          )}
+        </nav>
+      </div>
+    </FilterCtx.Provider>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
